@@ -1,0 +1,14 @@
+NO,sunny,hot,high,weak
+NO,sunny,hot,high,strong
+YES,overcast,hot,high,weak
+YES,rainfall,mild,high,weak
+YES,rainfall,cool,normal,weak
+NO,rainfall,cool,normal,strong
+YES,overcast,cool,normal,strong
+NO,sunny,mild,high,weak
+YES,sunny,cool,normal,weak
+YES,rainfall,mild,normal,weak
+YES,sunny,mild,normal,strong
+YES,overcast,mild,high,strong
+YES,overcast,hot,normal,weak
+NO,rainfall,mild,high,strong
