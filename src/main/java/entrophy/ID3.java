@@ -35,7 +35,7 @@ class ID3 {
 		id3.pw.flush();
 		id3.pw.close();
 		List<String> ruleList = Utility.exportRule(id3.tree.branch.get(0));
-		for(String rule : ruleList) {
+		for (String rule : ruleList) {
 			System.out.println(rule);
 		}
 	}
@@ -46,7 +46,7 @@ class ID3 {
 		branch.criteria = criteria;
 		tree.branch.add(branch);
 		if (attributes == null || !Row.isContinue(attributes)) { // same class
-			branch.name = attributes.get(0).className;
+			branch.name = attributes == null ? criteria : attributes.get(0).className;
 			return;
 		}
 		double systemEntrophy = Row.computeEntrophy(attributes);
@@ -74,7 +74,7 @@ class ID3 {
 		pw.write("--------------------------------------------------------\n");
 		if (selectedAttribute == null) {
 			System.out.println("null dected.");
-			createTree(rows, branch, "Zero");
+			createTree(null, branch, "Zero");
 			return;
 		}
 		pw.write("selected :" + selectedAttribute.name + " <<<<\n");
@@ -85,6 +85,13 @@ class ID3 {
 			List<Row> rows = entry.getValue();
 			createTree(rows, branch, name);
 		}
+	}
+	
+	private List<Row> getDominateRow(List<Data> dataList) {
+		Data data = dataList.get(0);
+		String key = data.map.keySet().iterator().next();
+		return data.map.get(key);
+		// return null;
 	}
 
 	public Data classified(int index, List<Row> list, double systemEntrophy) {
