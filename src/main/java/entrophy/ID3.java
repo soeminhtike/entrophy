@@ -9,7 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.log4j.Logger;
+
 class ID3 {
+	
+	private static Logger logger = Logger.getLogger(ID3.class);
 
 	public Branch tree = new Branch("##");
 
@@ -19,16 +23,16 @@ class ID3 {
 		pw = new PrintWriter(new File("operation.log"));
 	}
 
-	// public static final String[] header = { "Outlook", "Temperature", "Humidity",
-	// "Wind" };
+	 public static final String[] header = { "Outlook", "Temperature", "Humidity",
+	 "Wind" };
 
-	public static final String[] header = { "Class", "Repeat", "Attendance", "Difficulty", "Q1", "Q2", "Q3", "Q4", "Q5",
-			"Q6", "Q7", "Q8", "Q9", "Q10", "Q11", "Q12", "Q13", "Q14", "Q15", "Q16", "Q17", "Q18", "Q19", "Q20", "Q21",
-			"Q22", "Q23", "Q24", "Q25", "Q26", "Q27", "Q28" };
+	//public static final String[] header = { "Class", "Repeat", "Attendance", "Difficulty", "Q1", "Q2", "Q3", "Q4", "Q5",
+	//		"Q6", "Q7", "Q8", "Q9", "Q10", "Q11", "Q12", "Q13", "Q14", "Q15", "Q16", "Q17", "Q18", "Q19", "Q20", "Q21",
+	//		"Q22", "Q23", "Q24", "Q25", "Q26", "Q27", "Q28" };
 
 	public static void main(String[] args) throws Exception {
 		ID3 id3 = new ID3();
-		List<Row> dataRows = Utility.parseCSV("test2.csv");
+		List<Row> dataRows = Utility.parseCSV("test.csv");
 		id3.createTree(dataRows, id3.tree, "entry");
 		// System.out.println("----------------------------------------------------------------------------");
 		Utility.print(id3.tree);
@@ -73,7 +77,7 @@ class ID3 {
 
 		pw.write("--------------------------------------------------------\n");
 		if (selectedAttribute == null) {
-			System.out.println("null dected.");
+			logger.info("null dected.");
 			createTree(null, branch, "Zero");
 			return;
 		}
@@ -87,12 +91,6 @@ class ID3 {
 		}
 	}
 	
-	private List<Row> getDominateRow(List<Data> dataList) {
-		Data data = dataList.get(0);
-		String key = data.map.keySet().iterator().next();
-		return data.map.get(key);
-		// return null;
-	}
 
 	public Data classified(int index, List<Row> list, double systemEntrophy) {
 		Map<String, List<Row>> map = new HashMap<>();
@@ -106,15 +104,9 @@ class ID3 {
 				rows = new ArrayList<>();
 				map.put(key, rows);
 			}
-			// System.out.println("input :" + row );
 			Row newRow = Utility.createCreateRow(row, index);
 			rows.add(newRow);
-			// System.out.println("result :" + newRow+" >>" +
-			// Arrays.toString(newRow.header));
-			// System.out.println("");
 		}
-		// System.out.println(map.size());
-		// String header = map.values().iterator().next().get(0).header[index];
 		for (Entry<String, List<Row>> entry : map.entrySet()) {
 			double entrophy = Row.computeEntrophy(entry.getValue());
 			double size = entry.getValue().size();
@@ -123,6 +115,20 @@ class ID3 {
 
 		return new Data(header2, systemEntrophy, map);
 
+	}
+	
+	protected void groupData(List<Row> list, int index, Map<String, List<Row>> map) {
+		for (Row row : list) {
+			String key = row.getAttributes()[index];
+			List<Row> rows = map.get(key);
+
+			if (rows == null) {
+				rows = new ArrayList<>();
+				map.put(key, rows);
+			}
+			Row newRow = Utility.createCreateRow(row, index);
+			rows.add(newRow);
+		}
 	}
 
 }

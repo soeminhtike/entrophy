@@ -13,12 +13,15 @@ public class Row {
 
 	public String[] header;
 
-	public static Row create(String line) {
+	public static Row create(String line, boolean first) {
 		Row row = new Row();
 		String[] data = line.split(",");
 		int length = data.length;
-		row.className = data[length - 1];
-		row.attributes = Arrays.copyOfRange(data, 0, length - 1);
+		row.className = first ? data[0] : data[length - 1];
+		if (!first)
+			row.attributes = Arrays.copyOfRange(data, 0, length - 1);
+		else
+			row.attributes = Arrays.copyOfRange(data, 1, length);
 		row.header = ID3.header;
 		return row;
 	}
@@ -62,7 +65,7 @@ public class Row {
 		float entro = 0f;
 		for (Float data : map.values()) {
 			double num = data / total;
-			entro += -(num * log2(num));
+			entro += -(num * Utility.log2(num));
 		}
 		return entro;
 	}
@@ -77,12 +80,10 @@ public class Row {
 		float entro = 0f;
 		for (Float data : map.values()) {
 			double num = data / total;
-			entro += -(num * log2(num));
+			entro += -(num * Utility.log2(num));
 		}
 		return entro;
 	}
 
-	private static double log2(double num) {
-		return Math.log(num) / Math.log(2d);
-	}
+	
 }

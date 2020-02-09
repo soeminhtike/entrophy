@@ -9,13 +9,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 public class Utility {
+
+	private static Logger logger= Logger.getLogger(Utility.class);
+	
+	private static final boolean applyNumeric = false;
+	
+	//location of class name
+	private static final boolean first = true;
 
 	public static double computeSystemEntrophy(List<Row> attributes) {
 		Map<String, Float> map = new HashMap<>();
 		attributes.forEach(attr -> {
 			Float count = map.getOrDefault(attr.className, 0f) + 1;
-			System.out.println(attr.className);
 			map.put(attr.className, count);
 		});
 		float total = attributes.size();
@@ -27,7 +35,7 @@ public class Utility {
 		return entro;
 	}
 
-	private static double log2(double num) {
+	public static double log2(double num) {
 		return Math.log(num) / Math.log(2d);
 	}
 
@@ -51,18 +59,17 @@ public class Utility {
 		while ((line = br.readLine()) != null) {
 			if (line.startsWith("#"))
 				continue;
-			rows.add(Row.create(line));
+			rows.add(Row.create(line, first));
 		}
 		br.close();
 
-		applyNumeric(rows);
-		// System.out.println(Arrays.toString(sum));
-		// System.exit(0);
+		if (applyNumeric)
+			applyNumeric(rows);
 		return rows;
 	}
 
 	public static void applyNumeric(List<Row> rows) {
-		//applyMinMaxMean(rows);
+		// applyMinMaxMean(rows);
 		applyDefaultMean(rows);
 	}
 
@@ -98,13 +105,13 @@ public class Utility {
 
 		for (Row row : rows) {
 			for (int i = 0; i < row.attributes.length; i++) {
-				 sum[i] += Integer.parseInt(row.attributes[i]);
-				//int num = Integer.parseInt(row.attributes[i]);
-				//if (num > sum[i][1]) { // maximum
-				//	sum[i] = num;
-				//}
-				//if (num < sum[i][0]) // minimum
-				//	sum[i][0] = num;
+				sum[i] += Integer.parseInt(row.attributes[i]);
+				// int num = Integer.parseInt(row.attributes[i]);
+				// if (num > sum[i][1]) { // maximum
+				// sum[i] = num;
+				// }
+				// if (num < sum[i][0]) // minimum
+				// sum[i][0] = num;
 
 			}
 		}
