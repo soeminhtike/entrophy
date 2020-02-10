@@ -15,10 +15,10 @@ public class Utility {
 
 	private static Logger logger= Logger.getLogger(Utility.class);
 	
-	private static final boolean applyNumeric = false;
+	private static final boolean applyNumeric = true;
 	
 	//location of class name
-	private static final boolean first = true;
+	private static final boolean first = false;
 
 	public static double computeSystemEntrophy(List<Row> attributes) {
 		Map<String, Float> map = new HashMap<>();

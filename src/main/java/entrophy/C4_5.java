@@ -21,7 +21,7 @@ public class C4_5 extends ID3 {
 
 	public static void main(String[] args) throws Exception {
 		C4_5 c45 = new C4_5();
-		List<Row> dataRows = Utility.parseCSV("test.csv");
+		List<Row> dataRows = Utility.parseCSV("test2.csv");
 		c45.createTree(dataRows, c45.tree, "entry");
 		Utility.print(c45.tree);
 	}
@@ -40,6 +40,24 @@ public class C4_5 extends ID3 {
 			systemEntrophy -= (targetRow / totalRow) * subEntrophy;
 		}
 		return new Data(header2, systemEntrophy, map);
+	}
+	
+	protected Data selected(List<Data> dataList) {
+		double result = Double.MIN_VALUE;
+		Data selectedAttribute = null;
+		StringBuffer buffer = new StringBuffer();
+		dataList.forEach(data -> {
+			buffer.append("\n" + data.name +" >> " + data.entrophy+", ");
+		});
+		logger.info(buffer);
+		for (Data data : dataList) {
+			if (data.entrophy > result) {
+				result = data.entrophy;
+				selectedAttribute = data;
+			}
+		}
+		logger.info("selected " + result);
+		return selectedAttribute;
 	}
 
 	private double calculateEntrophy(List<Row> attributes) {

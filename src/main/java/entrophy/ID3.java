@@ -23,12 +23,12 @@ class ID3 {
 		pw = new PrintWriter(new File("operation.log"));
 	}
 
-	 public static final String[] header = { "Outlook", "Temperature", "Humidity",
-	 "Wind" };
+	// public static final String[] header = { "Outlook", "Temperature", "Humidity",
+	// "Wind" };
 
-	//public static final String[] header = { "Class", "Repeat", "Attendance", "Difficulty", "Q1", "Q2", "Q3", "Q4", "Q5",
-	//		"Q6", "Q7", "Q8", "Q9", "Q10", "Q11", "Q12", "Q13", "Q14", "Q15", "Q16", "Q17", "Q18", "Q19", "Q20", "Q21",
-	//		"Q22", "Q23", "Q24", "Q25", "Q26", "Q27", "Q28" };
+	public static final String[] header = { "Class", "Repeat", "Attendance", "Difficulty", "Q1", "Q2", "Q3", "Q4", "Q5",
+			"Q6", "Q7", "Q8", "Q9", "Q10", "Q11", "Q12", "Q13", "Q14", "Q15", "Q16", "Q17", "Q18", "Q19", "Q20", "Q21",
+			"Q22", "Q23", "Q24", "Q25", "Q26", "Q27", "Q28" };
 
 	public static void main(String[] args) throws Exception {
 		ID3 id3 = new ID3();
@@ -66,14 +66,8 @@ class ID3 {
 		pw.write(String.format("Branches :%s\n", dataList.size()));
 
 		pw.write("\n");
-		double result = Double.MIN_VALUE;
-		Data selectedAttribute = null;
-		for (Data data : dataList) {
-			if (data.entrophy > result) {
-				result = data.entrophy;
-				selectedAttribute = data;
-			}
-		}
+		// double result = Double.MIN_VALUE;
+		Data selectedAttribute = selected(dataList);
 
 		pw.write("--------------------------------------------------------\n");
 		if (selectedAttribute == null) {
@@ -89,6 +83,18 @@ class ID3 {
 			List<Row> rows = entry.getValue();
 			createTree(rows, branch, name);
 		}
+	}
+	
+	protected Data selected(List<Data> dataList) {
+		double result = Double.MIN_VALUE;
+		Data selectedAttribute = null;
+		for (Data data : dataList) {
+			if (data.entrophy > result) {
+				result = data.entrophy;
+				selectedAttribute = data;
+			}
+		}
+		return selectedAttribute;
 	}
 	
 
