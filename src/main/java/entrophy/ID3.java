@@ -12,7 +12,7 @@ import java.util.Map.Entry;
 import org.apache.log4j.Logger;
 
 class ID3 {
-	
+
 	private static Logger logger = Logger.getLogger(ID3.class);
 
 	public Branch tree = new Branch("##");
@@ -23,12 +23,13 @@ class ID3 {
 		pw = new PrintWriter(new File("operation.log"));
 	}
 
-	// public static final String[] header = { "Outlook", "Temperature", "Humidity",
+	// public static final String[] header = { "Outlook", "Temperature",
+	// "Humidity",
 	// "Wind" };
 
-	public static final String[] header = { "Class", "Repeat", "Attendance", "Difficulty", "Q1", "Q2", "Q3", "Q4", "Q5",
-			"Q6", "Q7", "Q8", "Q9", "Q10", "Q11", "Q12", "Q13", "Q14", "Q15", "Q16", "Q17", "Q18", "Q19", "Q20", "Q21",
-			"Q22", "Q23", "Q24", "Q25", "Q26", "Q27", "Q28" };
+	// @formatter:off
+	public static final String[] header = { "Class", "Repeat", "Attendance", "Difficulty", "Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8", "Q9", "Q10", "Q11", "Q12", "Q13", "Q14", "Q15", "Q16", "Q17", "Q18", "Q19", "Q20", "Q21", "Q22", "Q23", "Q24", "Q25", "Q26", "Q27", "Q28" };
+	// @formatter:on
 
 	public static void main(String[] args) throws Exception {
 		ID3 id3 = new ID3();
@@ -50,11 +51,14 @@ class ID3 {
 		branch.criteria = criteria;
 		tree.branch.add(branch);
 		if (attributes == null || !Row.isContinue(attributes)) { // same class
-			branch.name = attributes == null ? criteria : attributes.get(0).className;
+			branch.name = attributes == null
+					? criteria
+					: attributes.get(0).className;
 			return;
 		}
 		double systemEntrophy = Row.computeEntrophy(attributes);
-		pw.write(String.format("System entrophy of %s :%s\n", criteria, systemEntrophy));
+		pw.write(String.format("System entrophy of %s :%s\n", criteria,
+				systemEntrophy));
 		List<Data> dataList = new ArrayList<>();
 		pw.write("\n----------------------\n");
 		for (int i = 0; i < attributes.get(0).getAttributes().length; i++) {
@@ -78,13 +82,14 @@ class ID3 {
 		pw.write("selected :" + selectedAttribute.name + " <<<<\n");
 		pw.write("--------------------------------------------------------\n");
 		branch.name = selectedAttribute.name;
-		for (Entry<String, List<Row>> entry : selectedAttribute.map.entrySet()) {
+		for (Entry<String, List<Row>> entry : selectedAttribute.map
+				.entrySet()) {
 			String name = entry.getKey();
 			List<Row> rows = entry.getValue();
 			createTree(rows, branch, name);
 		}
 	}
-	
+
 	protected Data selected(List<Data> dataList) {
 		double result = Double.MIN_VALUE;
 		Data selectedAttribute = null;
@@ -96,7 +101,6 @@ class ID3 {
 		}
 		return selectedAttribute;
 	}
-	
 
 	public Data classified(int index, List<Row> list, double systemEntrophy) {
 		Map<String, List<Row>> map = new HashMap<>();
@@ -122,8 +126,9 @@ class ID3 {
 		return new Data(header2, systemEntrophy, map);
 
 	}
-	
-	protected void groupData(List<Row> list, int index, Map<String, List<Row>> map) {
+
+	protected void groupData(List<Row> list, int index,
+			Map<String, List<Row>> map) {
 		for (Row row : list) {
 			String key = row.getAttributes()[index];
 			List<Row> rows = map.get(key);

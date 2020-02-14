@@ -13,11 +13,15 @@ import org.apache.log4j.Logger;
 
 public class Utility {
 
-	private static Logger logger= Logger.getLogger(Utility.class);
-	
+	private static Logger logger = Logger.getLogger(Utility.class);
+
 	private static final boolean applyNumeric = true;
-	
-	//location of class name
+
+	private static boolean manualMean = true;
+
+	public static int[] means = {7, 3, 4, 3};
+
+	// location of class name
 	private static final boolean first = false;
 
 	public static double computeSystemEntrophy(List<Row> attributes) {
@@ -43,7 +47,8 @@ public class Utility {
 		for (int i = 0; i < tree.level; i++) {
 			System.out.print("--");
 		}
-		System.out.println(String.format("[%s:%s]  ", tree.criteria, tree.name, tree.branch.size(), tree.level));
+		System.out.println(String.format("[%s:%s]  ", tree.criteria, tree.name,
+				tree.branch.size(), tree.level));
 		if (!tree.branch.isEmpty()) {
 			for (Branch branch : tree.branch) {
 				print(branch);
@@ -51,7 +56,8 @@ public class Utility {
 		}
 	}
 
-	public static List<Row> parseCSV(String fileName) throws FileNotFoundException, IOException {
+	public static List<Row> parseCSV(String fileName)
+			throws FileNotFoundException, IOException {
 		BufferedReader br = new BufferedReader(new FileReader(fileName));
 
 		String line;
@@ -69,33 +75,37 @@ public class Utility {
 	}
 
 	public static void applyNumeric(List<Row> rows) {
-		// applyMinMaxMean(rows);
-		applyDefaultMean(rows);
+		applyMinMaxMean(rows);
+		// applyDefaultMean(rows);
 	}
 
 	private static void applyMinMaxMean(List<Row> rows) {
-		int sum[][] = new int[rows.get(0).getAttributes().length][2];
+		if (!manualMean) {
+			int sum[][] = new int[rows.get(0).getAttributes().length][2];
 
-		for (Row row : rows) {
-			for (int i = 0; i < row.attributes.length; i++) {
-				// sum[i] += Integer.parseInt(row.attributes[i]);
-				int num = Integer.parseInt(row.attributes[i]);
-				if (num > sum[i][1]) { // maximum
-					sum[i][1] = num;
+			for (Row row : rows) {
+				for (int i = 0; i < row.attributes.length; i++) {
+					// sum[i] += Integer.parseInt(row.attributes[i]);
+					int num = Integer.parseInt(row.attributes[i]);
+					if (num > sum[i][1]) { // maximum
+						sum[i][1] = num;
+					}
+					if (num < sum[i][0]) // minimum
+						sum[i][0] = num;
+
 				}
-				if (num < sum[i][0]) // minimum
-					sum[i][0] = num;
+			}
 
+			means = new int[sum.length];
+
+			for (int i = 0; i < means.length; i++) {
+				means[i] = (sum[i][0] + sum[i][1]) / 2;
 			}
 		}
-
-		int mean[] = new int[sum.length];
-		for (int i = 0; i < mean.length; i++) {
-			mean[i] = (sum[i][0] + sum[i][1]) / 2;
-		}
 		for (Row row : rows) {
 			for (int i = 0; i < row.attributes.length; i++) {
-				row.attributes[i] = mean[i] >= Integer.parseInt(row.attributes[i]) ? "1" : "2";
+				row.attributes[i] = means[i] >= Integer
+						.parseInt(row.attributes[i]) ? "1" : "2";
 			}
 		}
 	}
@@ -122,7 +132,8 @@ public class Utility {
 		}
 		for (Row row : rows) {
 			for (int i = 0; i < row.attributes.length; i++) {
-				row.attributes[i] = mean[i] >= Integer.parseInt(row.attributes[i]) ? "1" : "2";
+				row.attributes[i] = mean[i] >= Integer
+						.parseInt(row.attributes[i]) ? "1" : "2";
 			}
 		}
 	}
@@ -133,14 +144,17 @@ public class Utility {
 		return ruleList;
 	}
 
-	public static void export(Branch root, String prefix, List<String> ruleList) {
+	public static void export(Branch root, String prefix,
+			List<String> ruleList) {
 		if (root.branch.isEmpty()) {
-			ruleList.add(String.format("(%s)= %s", prefix.substring(0, prefix.length() - 1), root.name));
+			ruleList.add(String.format("(%s)= %s",
+					prefix.substring(0, prefix.length() - 1), root.name));
 
 		} else
 			for (Branch child : root.branch) {
 				String format = prefix.equals("") ? "%s" : "%s and ";
-				export(child, String.format(format + "(%s=%s) ", prefix, root.name, child.criteria), ruleList);
+				export(child, String.format(format + "(%s=%s) ", prefix,
+						root.name, child.criteria), ruleList);
 			}
 	}
 

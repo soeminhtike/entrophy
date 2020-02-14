@@ -8,6 +8,7 @@ public class Data {
 	// String attributeName;
 	String name;
 	double entrophy;
+	double gain;
 
 	public Data(String name, double entrophy, Map<String, List<Row>> map) {
 		this.name = name;

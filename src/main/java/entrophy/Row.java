@@ -5,8 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 public class Row {
 
+	private static Logger logger = Logger.getLogger(Row.class);
 	public String className;
 
 	public String[] attributes;
@@ -64,6 +67,7 @@ public class Row {
 		float total = attributes.size();
 		float entro = 0f;
 		for (Float data : map.values()) {
+			logger.info(String.format("%s/%s", data, total));
 			double num = data / total;
 			entro += -(num * Utility.log2(num));
 		}
