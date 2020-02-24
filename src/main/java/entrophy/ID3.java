@@ -51,16 +51,15 @@ class ID3 {
 		branch.criteria = criteria;
 		tree.branch.add(branch);
 		if (attributes == null || !Row.isContinue(attributes)) { // same class
-			branch.name = attributes == null
-					? criteria
-					: attributes.get(0).className;
+			branch.name = attributes == null ? criteria+ " " : attributes.get(0).className;
+			branch.criteria = criteria;
 			return;
 		}
 		double systemEntrophy = Row.computeEntrophy(attributes);
-		pw.write(String.format("System entrophy of %s :%s\n", criteria,
-				systemEntrophy));
+		pw.write(String.format("System entrophy of %s :%s\n", criteria, systemEntrophy));
 		List<Data> dataList = new ArrayList<>();
 		pw.write("\n----------------------\n");
+		
 		for (int i = 0; i < attributes.get(0).getAttributes().length; i++) {
 			Data data = classified(i, attributes, systemEntrophy);
 			dataList.add(data);
@@ -76,14 +75,14 @@ class ID3 {
 		pw.write("--------------------------------------------------------\n");
 		if (selectedAttribute == null) {
 			logger.info("null dected.");
-			createTree(null, branch, "Zero");
+			createTree(null, branch, "Zero ---");
 			return;
 		}
 		pw.write("selected :" + selectedAttribute.name + " <<<<\n");
 		pw.write("--------------------------------------------------------\n");
+		
 		branch.name = selectedAttribute.name;
-		for (Entry<String, List<Row>> entry : selectedAttribute.map
-				.entrySet()) {
+		for (Entry<String, List<Row>> entry : selectedAttribute.map.entrySet()) {
 			String name = entry.getKey();
 			List<Row> rows = entry.getValue();
 			createTree(rows, branch, name);
@@ -127,8 +126,7 @@ class ID3 {
 
 	}
 
-	protected void groupData(List<Row> list, int index,
-			Map<String, List<Row>> map) {
+	protected void groupData(List<Row> list, int index, Map<String, List<Row>> map) {
 		for (Row row : list) {
 			String key = row.getAttributes()[index];
 			List<Row> rows = map.get(key);

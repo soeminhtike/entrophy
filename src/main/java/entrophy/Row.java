@@ -67,7 +67,6 @@ public class Row {
 		float total = attributes.size();
 		float entro = 0f;
 		for (Float data : map.values()) {
-			logger.info(String.format("%s/%s", data, total));
 			double num = data / total;
 			entro += -(num * Utility.log2(num));
 		}
