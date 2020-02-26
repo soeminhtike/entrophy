@@ -1,6 +1,7 @@
 package entrophy;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
+import org.apache.log4j.PropertyConfigurator;
 
 class ID3 {
 
@@ -17,10 +19,11 @@ class ID3 {
 
 	public Branch tree = new Branch("##");
 
-	private PrintWriter pw;
+	// private PrintWriter pw;
 
 	public ID3() throws FileNotFoundException {
-		pw = new PrintWriter(new File("operation.log"));
+		// pw = new PrintWriter(new File("operation.log"));
+		PropertyConfigurator.configure(new FileInputStream(new File("src/test/resources/log4j.properties")));
 	}
 
 	// public static final String[] header = { "Outlook", "Temperature",
@@ -33,16 +36,20 @@ class ID3 {
 
 	public static void main(String[] args) throws Exception {
 		ID3 id3 = new ID3();
-		List<Row> dataRows = Utility.parseCSV("test.csv");
+		List<Row> dataRows = Utility.parseCSV("test2.csv");
 		id3.createTree(dataRows, id3.tree, "entry");
 		// System.out.println("----------------------------------------------------------------------------");
 		Utility.print(id3.tree);
-		id3.pw.flush();
-		id3.pw.close();
-		List<String> ruleList = Utility.exportRule(id3.tree.branch.get(0));
+		// id3.pw.flush();
+		// id3.pw.close();
+		logger.info("----------------");
+		List<String> ruleList = Utility.exportRuleStr(id3.tree.branch.get(0));
 		for (String rule : ruleList) {
-			System.out.println(rule);
+			logger.info("Rule :" + rule);
 		}
+		logger.info("---------");
+
+		Utility.dividedData("test2.csv", Utility.exportRules(id3.tree.branch.get(0)));
 	}
 
 	public void createTree(List<Row> attributes, Branch tree, String criteria) {
@@ -51,36 +58,37 @@ class ID3 {
 		branch.criteria = criteria;
 		tree.branch.add(branch);
 		if (attributes == null || !Row.isContinue(attributes)) { // same class
-			branch.name = attributes == null ? criteria+ " " : attributes.get(0).className;
+			branch.name = attributes == null ? criteria + " " : attributes.get(0).className;
 			branch.criteria = criteria;
 			return;
 		}
 		double systemEntrophy = Row.computeEntrophy(attributes);
-		pw.write(String.format("System entrophy of %s :%s\n", criteria, systemEntrophy));
+		// pw.write(String.format("System entrophy of %s :%s\n", criteria,
+		// systemEntrophy));
 		List<Data> dataList = new ArrayList<>();
-		pw.write("\n----------------------\n");
-		
+		// pw.write("\n----------------------\n");
+
 		for (int i = 0; i < attributes.get(0).getAttributes().length; i++) {
 			Data data = classified(i, attributes, systemEntrophy);
 			dataList.add(data);
-			pw.write(String.format("%s: %s", data.name, data.entrophy));
-			pw.write("\n");
+			// pw.write(String.format("%s: %s", data.name, data.entrophy));
+			// pw.write("\n");
 		}
-		pw.write(String.format("Branches :%s\n", dataList.size()));
+		// pw.write(String.format("Branches :%s\n", dataList.size()));
 
-		pw.write("\n");
+		// pw.write("\n");
 		// double result = Double.MIN_VALUE;
 		Data selectedAttribute = selected(dataList);
 
-		pw.write("--------------------------------------------------------\n");
+		// pw.write("--------------------------------------------------------\n");
 		if (selectedAttribute == null) {
 			logger.info("null dected.");
 			createTree(null, branch, "Zero ---");
 			return;
 		}
-		pw.write("selected :" + selectedAttribute.name + " <<<<\n");
-		pw.write("--------------------------------------------------------\n");
-		
+		// pw.write("selected :" + selectedAttribute.name + " <<<<\n");
+		// pw.write("--------------------------------------------------------\n");
+
 		branch.name = selectedAttribute.name;
 		for (Entry<String, List<Row>> entry : selectedAttribute.map.entrySet()) {
 			String name = entry.getKey();

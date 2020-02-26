@@ -5,21 +5,28 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import entrophy.Rule.Matcher;
+
 public class Utility {
 
 	private static Logger logger = Logger.getLogger(Utility.class);
 
-	private static final boolean applyNumeric = true;
+	private static final boolean applyNumeric = false;
 
 	private static boolean manualMean = true;
 
-	public static int[] means = {7,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3}; //{7, 3, 4, 3};
+	public static int[] means = {7, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3}; // {7,
+																																	// 3,
+																																	// 4,
+																																	// 3};
 
 	// location of class name
 	private static final boolean first = false;
@@ -47,22 +54,20 @@ public class Utility {
 		for (int i = 0; i < tree.level; i++) {
 			System.out.print("--");
 		}
-		System.out.println(String.format("[%s:%s]  ", tree.criteria, tree.name,
-				tree.branch.size(), tree.level));
+		System.out.println(String.format("[%s:%s]  ", tree.criteria, tree.name, tree.branch.size(), tree.level));
 		if (!tree.branch.isEmpty()) {
 			for (Branch branch : tree.branch) {
 				print(branch);
 			}
 		}
 	}
-	
+
 	public static void exportTreeJson(Branch tree) {
 		String test = tree.toJSonString();
-		logger.info(test.substring(1, test.length()-1));
+		logger.info(test.substring(1, test.length() - 1));
 	}
 
-	public static List<Row> parseCSV(String fileName)
-			throws FileNotFoundException, IOException {
+	public static List<Row> parseCSV(String fileName) throws FileNotFoundException, IOException {
 		BufferedReader br = new BufferedReader(new FileReader(fileName));
 
 		String line;
@@ -109,8 +114,7 @@ public class Utility {
 		}
 		for (Row row : rows) {
 			for (int i = 0; i < row.attributes.length; i++) {
-				row.attributes[i] = means[i] >= Integer
-						.parseInt(row.attributes[i]) ? "1" : "2";
+				row.attributes[i] = means[i] >= Integer.parseInt(row.attributes[i]) ? "1" : "2";
 			}
 		}
 	}
@@ -137,30 +141,83 @@ public class Utility {
 		}
 		for (Row row : rows) {
 			for (int i = 0; i < row.attributes.length; i++) {
-				row.attributes[i] = mean[i] >= Integer
-						.parseInt(row.attributes[i]) ? "1" : "2";
+				row.attributes[i] = mean[i] >= Integer.parseInt(row.attributes[i]) ? "1" : "2";
 			}
 		}
 	}
 
-	public static List<String> exportRule(Branch branch) {
+	public static List<String> exportRuleStr(Branch branch) {
 		List<String> ruleList = new ArrayList<>();
-		export(branch, "", ruleList);
+		exportStr(branch, "", ruleList);
 		return ruleList;
 	}
 
-	public static void export(Branch root, String prefix,
-			List<String> ruleList) {
+	public static Collection<Rule> exportRules(Branch branch) {
+		Map<String, Rule> ruleMap = new HashMap<>(); // new ArrayList<>();
+		export(branch, new ArrayList<>(), ruleMap, "");
+		return ruleMap.values();
+	}
+
+	public static void exportStr(Branch root, String prefix, List<String> ruleList) {
 		if (root.branch.isEmpty()) {
-			ruleList.add(String.format("(%s)= %s",
-					prefix.substring(0, prefix.length() - 1), root.name));
+			ruleList.add(String.format("(%s)= %s", prefix.substring(0, prefix.length() - 1), root.name));
 
 		} else
 			for (Branch child : root.branch) {
 				String format = prefix.equals("") ? "%s" : "%s and ";
-				export(child, String.format(format + "(%s=%s) ", prefix,
-						root.name, child.criteria), ruleList);
+				exportStr(child, String.format(format + "(%s=%s) ", prefix, root.name, child.criteria), ruleList);
 			}
+	}
+
+	public static void export(Branch root, List<Matcher> matcherList, Map<String, Rule> ruleMap, String criteria) {
+		if (root.branch.isEmpty()) {
+			Rule rule = new Rule(root.name);
+			rule.constraints = matcherList;
+			ruleMap.put(System.nanoTime() + "", rule);
+		}
+
+		for (Branch branch : root.branch) {
+			Matcher matcher2 = new Matcher(root.name, branch.criteria);
+			List<Matcher> newMatcher = new ArrayList<>();
+			newMatcher.add(matcher2);
+			newMatcher.addAll(matcherList);
+			export(branch, newMatcher, ruleMap, branch.criteria);
+		}
+	}
+
+	public static List<String> groupDataByRow(Collection<Rule> rules, Row row) {
+		List<String> name = new ArrayList<>();
+		for (Rule rule : rules) {
+			if (rule.isMatch(row)) {
+				name.add(row.className);
+			}
+		}
+		// System.exit(0);
+		return name;
+	}
+
+	public static void dividedData(String fileName, Collection<Rule> rules) {
+		List<Row> rows = null;
+		try {
+			rows = Utility.parseCSV(fileName);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		rules.forEach(Rule::buildMap);
+		for (Row row : rows) {
+			logger.info(Arrays.deepToString(row.attributes) + " >> " + groupDataByRow(rules, row));
+		}
+	}
+
+	private static Rule addRule(Map<String, Rule> ruleMap, Branch branch) {
+		Rule rule = ruleMap.get(branch.name + branch.criteria);
+		if (rule == null) {
+			rule = new Rule(branch.name);
+			ruleMap.put(branch.name + branch.criteria, rule);
+		}
+		rule.add(branch);
+		return rule;
 	}
 
 	public static Row createCreateRow(Row row, int index) {
