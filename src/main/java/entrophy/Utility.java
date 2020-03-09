@@ -23,10 +23,7 @@ public class Utility {
 
 	private static boolean manualMean = true;
 
-	public static int[] means = {7, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3}; // {7,
-																																	// 3,
-																																	// 4,
-																																	// 3};
+	public static int[] means = {7, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3}; 
 
 	// location of class name
 	private static final boolean first = false;
