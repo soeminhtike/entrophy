@@ -1,15 +1,18 @@
 package entrophy;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
@@ -23,7 +26,7 @@ public class Utility {
 
 	private static boolean manualMean = true;
 
-	public static int[] means = {7, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3}; 
+	public static int[] means = {7, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3};
 
 	// location of class name
 	private static final boolean first = false;
@@ -182,7 +185,7 @@ public class Utility {
 		}
 	}
 
-	public static List<String> groupDataByRow(Collection<Rule> rules, Row row) {
+	public static List<String> groupRowDataList(Collection<Rule> rules, Row row) {
 		List<String> name = new ArrayList<>();
 		for (Rule rule : rules) {
 			if (rule.isMatch(row)) {
@@ -191,6 +194,22 @@ public class Utility {
 		}
 		// System.exit(0);
 		return name;
+	}
+
+	public static void groupRowDataMap(Map<String, List<Row>> name, Collection<Rule> rules, Row row) {
+		// Map<String, List<Row>> name = new HashMap<>();
+		for (Rule rule : rules) {
+			if (rule.isMatch(row)) {
+				List<Row> rowList = name.get(row.className);
+				if (rowList == null) {
+					rowList = new ArrayList<>();
+					name.put(row.className, rowList);
+				}
+				rowList.add(row);
+			}
+		}
+		// System.exit(0);
+		// return name;
 	}
 
 	public static void dividedData(String fileName, Collection<Rule> rules) {
@@ -202,9 +221,35 @@ public class Utility {
 		}
 
 		rules.forEach(Rule::buildMap);
+		Map<String, List<Row>> rowMap = new HashMap<>();
 		for (Row row : rows) {
-			logger.info(Arrays.deepToString(row.attributes) + " >> " + groupDataByRow(rules, row));
+			// logger.info(Arrays.deepToString(row.attributes) + " >> " +
+			// groupRowDataList(rules, row));
+			groupRowDataMap(rowMap, rules, row);
 		}
+		File file = new File("output");
+		if (!file.exists()) {
+			file.mkdir();
+		}
+		try {
+			for (Entry<String, List<Row>> entry : rowMap.entrySet()) {
+				File outputFile = new File(file.getAbsoluteFile() + "/" + entry.getValue().get(0).className);
+
+				if (!outputFile.exists()) {
+					outputFile.createNewFile();
+				}
+				PrintWriter pw = new PrintWriter(outputFile);
+				for (Row row : entry.getValue()) {
+					for (String attribute : row.attributes)
+						pw.write(attribute + ",");
+					pw.write("\n");
+				}
+				pw.close();
+			}
+		} catch (IOException e) {
+			logger.error("Can't create file", e);
+		}
+
 	}
 
 	private static Rule addRule(Map<String, Rule> ruleMap, Branch branch) {
