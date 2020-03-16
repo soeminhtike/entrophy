@@ -48,7 +48,13 @@ class ID3 {
 		}
 		logger.info("---------");
 
-		Utility.dividedData("test2.csv", Utility.exportRules(id3.tree.branch.get(0)));
+		List<String> files = Utility.dividedData("test2.csv", Utility.exportRules(id3.tree.branch.get(0)));
+		for(String file : files) {
+			logger.info("-------------------------------");
+			C4_5 c45 = new C4_5();
+			c45.createTree(Utility.parseCSV(file), c45.tree, "entry");
+			Utility.exportTreeJson(c45.tree.branch.get(0));
+		}
 	}
 
 	public void createTree(List<Row> attributes, Branch tree, String criteria) {

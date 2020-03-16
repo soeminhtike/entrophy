@@ -212,7 +212,7 @@ public class Utility {
 		// return name;
 	}
 
-	public static void dividedData(String fileName, Collection<Rule> rules) {
+	public static List<String> dividedData(String fileName, Collection<Rule> rules) {
 		List<Row> rows = null;
 		try {
 			rows = Utility.parseCSV(fileName);
@@ -231,6 +231,7 @@ public class Utility {
 		if (!file.exists()) {
 			file.mkdir();
 		}
+		List<String> files = new ArrayList<>();
 		try {
 			for (Entry<String, List<Row>> entry : rowMap.entrySet()) {
 				File outputFile = new File(file.getAbsoluteFile() + "/" + entry.getValue().get(0).className);
@@ -244,11 +245,13 @@ public class Utility {
 						pw.write(attribute + ",");
 					pw.write("\n");
 				}
+				files.add(outputFile.getAbsolutePath());
 				pw.close();
 			}
 		} catch (IOException e) {
 			logger.error("Can't create file", e);
 		}
+		return files;
 
 	}
 

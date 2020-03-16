@@ -25,6 +25,7 @@ public class C4_5 extends ID3 {
 		c45.createTree(dataRows, c45.tree, "entry");
 		//Utility.print(c45.tree);
 		Utility.exportTreeJson(c45.tree);
+		Utility.dividedData("test2.csv", Utility.exportRules(c45.tree.branch.get(0)));
 	}
 
 	public Data classified(int index, List<Row> list, double systemEntrophy) {
