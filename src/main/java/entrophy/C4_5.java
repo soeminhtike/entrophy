@@ -13,7 +13,7 @@ import org.apache.log4j.PropertyConfigurator;
 
 public class C4_5 extends ID3 {
 	
-	private static Logger logger = Logger.getLogger(C4_5.class);
+	// private static Logger logger = Logger.getLogger(C4_5.class);
 
 	public C4_5() throws FileNotFoundException {
 		PropertyConfigurator.configure(new FileInputStream(new File("src/test/resources/log4j.properties")));

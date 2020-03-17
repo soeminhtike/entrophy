@@ -14,7 +14,7 @@ import org.apache.log4j.PropertyConfigurator;
 
 class ID3 {
 
-	private static Logger logger = Logger.getLogger(ID3.class);
+	// private static Logger logger = Logger.getLogger(ID3.class);
 
 	public Branch tree = new Branch("##");
 
@@ -41,16 +41,13 @@ class ID3 {
 		Utility.print(id3.tree);
 		// id3.pw.flush();
 		// id3.pw.close();
-		logger.info("----------------");
 		List<String> ruleList = Utility.exportRuleStr(id3.tree.branch.get(0));
 		for (String rule : ruleList) {
-			logger.info("Rule :" + rule);
+			System.out.println("Rule :" + rule);
 		}
-		logger.info("---------");
 
 		List<String> files = Utility.dividedData("test2.csv", Utility.exportRules(id3.tree.branch.get(0)));
 		for(String file : files) {
-			logger.info("-------------------------------");
 			C4_5 c45 = new C4_5();
 			c45.createTree(Utility.parseCSV(file), c45.tree, "entry");
 			Utility.exportTreeJson(c45.tree.branch.get(0));
@@ -87,7 +84,6 @@ class ID3 {
 
 		// pw.write("--------------------------------------------------------\n");
 		if (selectedAttribute == null) {
-			logger.info("null dected.");
 			createTree(null, branch, "Zero ---");
 			return;
 		}

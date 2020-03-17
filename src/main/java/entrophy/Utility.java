@@ -20,7 +20,7 @@ import entrophy.Rule.Matcher;
 
 public class Utility {
 
-	private static Logger logger = Logger.getLogger(Utility.class);
+	// private static Logger logger = Logger.getLogger(Utility.class);
 
 	private static final boolean applyNumeric = false;
 
@@ -64,7 +64,7 @@ public class Utility {
 
 	public static void exportTreeJson(Branch tree) {
 		String test = tree.toJSonString();
-		logger.info(test.substring(1, test.length() - 1));
+		System.out.println(test.substring(1, test.length() - 1));
 	}
 
 	public static List<Row> parseCSV(String fileName) throws FileNotFoundException, IOException {
@@ -249,7 +249,8 @@ public class Utility {
 				pw.close();
 			}
 		} catch (IOException e) {
-			logger.error("Can't create file", e);
+			// logger.error("Can't create file", e);
+			e.printStackTrace();
 		}
 		return files;
 
