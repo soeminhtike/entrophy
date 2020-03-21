@@ -4,12 +4,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
-import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 class ID3 {
@@ -30,28 +31,26 @@ class ID3 {
 	// "Wind" };
 
 	// @formatter:off
-	public static final String[] header = { "Class", "Repeat", "Attendance", "Difficulty", "Q1", "Q2", "Q3", "Q4", "Q5", "Q6", "Q7", "Q8", "Q9", "Q10", "Q11", "Q12", "Q13", "Q14", "Q15", "Q16", "Q17", "Q18", "Q19", "Q20", "Q21", "Q22", "Q23", "Q24", "Q25", "Q26", "Q27", "Q28" };
+	public static final String[] header = { 
+"Class", "Repeat", "Attendance", "Difficulty", "Q1", "Q2", "Q3", "Q4", "Q5","Q6", "Q7", "Q8", "Q9", "Q10", "Q11", "Q12", "Q13", "Q14", "Q15", "Q16", "Q17", "Q18", "Q19", "Q20", "Q21",
+			"Q22", "Q23", "Q24", "Q25", "Q26", "Q27", "Q28" 
+			};
 	// @formatter:on
 
+	// TODO
 	public static void main(String[] args) throws Exception {
 		ID3 id3 = new ID3();
-		List<Row> dataRows = Utility.parseCSV("test2.csv");
+		List<Row> dataRows = Utility.parseCSV("test4.csv", true);
 		id3.createTree(dataRows, id3.tree, "entry");
-		// System.out.println("----------------------------------------------------------------------------");
-		Utility.print(id3.tree);
-		// id3.pw.flush();
-		// id3.pw.close();
-		List<String> ruleList = Utility.exportRuleStr(id3.tree.branch.get(0));
-		for (String rule : ruleList) {
-			System.out.println("Rule :" + rule);
-		}
 
-		List<String> files = Utility.dividedData("test2.csv", Utility.exportRules(id3.tree.branch.get(0)));
-		for(String file : files) {
-			C4_5 c45 = new C4_5();
-			c45.createTree(Utility.parseCSV(file), c45.tree, "entry");
-			Utility.exportTreeJson(c45.tree.branch.get(0));
-		}
+		Collection<Rule> ruleList = Utility.exportRules(id3.tree.branch.get(0));
+		Utility.exportTreeJson(id3.tree.branch.get(0));
+		ruleList = ruleList.parallelStream().filter(Rule::isPure).collect(Collectors.toList());
+
+		File file = Utility.partitionData("test4.csv", ruleList, true);
+		C4_5 c45 = new C4_5();
+		c45.createTree(Utility.parseCSV(file.getAbsolutePath(), true), c45.tree, "entry");
+		Utility.exportTreeJson(c45.tree.branch.get(0));
 	}
 
 	public void createTree(List<Row> attributes, Branch tree, String criteria) {
@@ -65,30 +64,18 @@ class ID3 {
 			return;
 		}
 		double systemEntrophy = Row.computeEntrophy(attributes);
-		// pw.write(String.format("System entrophy of %s :%s\n", criteria,
-		// systemEntrophy));
 		List<Data> dataList = new ArrayList<>();
-		// pw.write("\n----------------------\n");
 
 		for (int i = 0; i < attributes.get(0).getAttributes().length; i++) {
 			Data data = classified(i, attributes, systemEntrophy);
 			dataList.add(data);
-			// pw.write(String.format("%s: %s", data.name, data.entrophy));
-			// pw.write("\n");
 		}
-		// pw.write(String.format("Branches :%s\n", dataList.size()));
-
-		// pw.write("\n");
-		// double result = Double.MIN_VALUE;
 		Data selectedAttribute = selected(dataList);
 
-		// pw.write("--------------------------------------------------------\n");
 		if (selectedAttribute == null) {
-			createTree(null, branch, "Zero ---");
+			createTree(null, branch, "NULL");
 			return;
 		}
-		// pw.write("selected :" + selectedAttribute.name + " <<<<\n");
-		// pw.write("--------------------------------------------------------\n");
 
 		branch.name = selectedAttribute.name;
 		for (Entry<String, List<Row>> entry : selectedAttribute.map.entrySet()) {

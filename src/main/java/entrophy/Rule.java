@@ -5,24 +5,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
-
 public class Rule {
 
-	private static Logger logger = Logger.getLogger(Rule.class);
-	 
 	List<Matcher> constraints;
 
 	Map<String, String> constrainMap;
 
 	public String name;
+	
+	public String id;
 
 	public Rule(String name) {
 		this.constraints = new ArrayList<>();
 		this.name = name;
 	}
 
-	public void buildMap() {
+	public void prepare() {
 		constrainMap = new HashMap<>();
 		for (Matcher matcher : constraints) {
 			constrainMap.put(matcher.key, matcher.value);
@@ -33,6 +31,10 @@ public class Rule {
 		Matcher matcher = new Matcher(branch.name, branch.criteria);
 		constraints.add(matcher);
 	}
+	
+	public boolean isPure() {
+		return !name.trim().equals("NULL");
+	}
 
 	public String toString() {
 		return name + " = " + this.constraints.toString();
@@ -41,10 +43,10 @@ public class Rule {
 	public boolean isMatch(Row row) {
 		for (int i = 0; i < row.header.length; i++) {
 			String header = row.header[i];
+			
 			String rowValue = row.attributes[i];
 			if (constrainMap.containsKey(header)) {
 				String value = constrainMap.get(header);
-				//logger.info(String.format("%s,%s == %s,%s", header, rowValue, header, value));
 				if (!value.equals(rowValue))
 					return false;
 			}

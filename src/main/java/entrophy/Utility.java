@@ -12,9 +12,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
-import org.apache.log4j.Logger;
 
 import entrophy.Rule.Matcher;
 
@@ -22,11 +19,11 @@ public class Utility {
 
 	// private static Logger logger = Logger.getLogger(Utility.class);
 
-	private static final boolean applyNumeric = false;
+	private static final boolean applyNumeric = true;
 
 	private static boolean manualMean = true;
 
-	public static int[] means = {7, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3};
+	public static int[] means = { 7, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 };
 
 	// location of class name
 	private static final boolean first = false;
@@ -67,21 +64,34 @@ public class Utility {
 		System.out.println(test.substring(1, test.length() - 1));
 	}
 
-	public static List<Row> parseCSV(String fileName) throws FileNotFoundException, IOException {
+	public static List<Row> parseCSV(String fileName, boolean applyNumeric) throws FileNotFoundException, IOException {
 		BufferedReader br = new BufferedReader(new FileReader(fileName));
 
 		String line;
 		List<Row> rows = new ArrayList<>();
+		System.out.println("---------Processing CSV ----------------");
+		System.out.println("File name :" + fileName);
+		int lineCount = 0;
 		while ((line = br.readLine()) != null) {
-			if (line.startsWith("#"))
+			Row row = parseLine(line);
+			if (row == null)
 				continue;
 			rows.add(Row.create(line, first));
+			lineCount++;
 		}
 		br.close();
-
+		System.out.println("Total line :" + lineCount);
 		if (applyNumeric)
 			applyNumeric(rows);
 		return rows;
+	}
+
+	private static Row parseLine(String line) {
+		if (line.startsWith("#"))
+			return null;
+		Row row = Row.create(line, first);
+		row.header = ID3.header;
+		return row;
 	}
 
 	public static void applyNumeric(List<Row> rows) {
@@ -89,34 +99,46 @@ public class Utility {
 		// applyDefaultMean(rows);
 	}
 
+	public static Row cloneRow(Row original) {
+		Row row = new Row();
+		row.className = original.className;
+		row.attributes = Arrays.copyOf(original.attributes, original.attributes.length);
+		row.header = Arrays.copyOf(original.header, original.header.length);
+		return row;
+	}
+
 	private static void applyMinMaxMean(List<Row> rows) {
-		if (!manualMean) {
-			int sum[][] = new int[rows.get(0).getAttributes().length][2];
+		means = manualMean ? means : calculateMeans(rows);
+		rows.parallelStream().forEach(row -> applyMean(row, means));
+	}
 
-			for (Row row : rows) {
-				for (int i = 0; i < row.attributes.length; i++) {
-					// sum[i] += Integer.parseInt(row.attributes[i]);
-					int num = Integer.parseInt(row.attributes[i]);
-					if (num > sum[i][1]) { // maximum
-						sum[i][1] = num;
-					}
-					if (num < sum[i][0]) // minimum
-						sum[i][0] = num;
-
-				}
-			}
-
-			means = new int[sum.length];
-
-			for (int i = 0; i < means.length; i++) {
-				means[i] = (sum[i][0] + sum[i][1]) / 2;
-			}
+	private static void applyMean(Row row, int[] means) {
+		for (int i = 0; i < row.attributes.length; i++) {
+			row.attributes[i] = means[i] >= Integer.parseInt(row.attributes[i]) ? "1" : "2";
 		}
-		for (Row row : rows) {
+	}
+
+	private static int[] calculateMeans(List<Row> rows) {
+		int sum[][] = new int[rows.get(0).getAttributes().length][2];
+
+		rows.parallelStream().forEach(row -> {
 			for (int i = 0; i < row.attributes.length; i++) {
-				row.attributes[i] = means[i] >= Integer.parseInt(row.attributes[i]) ? "1" : "2";
+				// sum[i] += Integer.parseInt(row.attributes[i]);
+				int num = Integer.parseInt(row.attributes[i]);
+				if (num > sum[i][1]) { // maximum
+					sum[i][1] = num;
+				}
+				if (num < sum[i][0]) // minimum
+					sum[i][0] = num;
 			}
+		});
+
+		int[] means = new int[sum.length];
+
+		for (int i = 0; i < means.length; i++) {
+			means[i] = (sum[i][0] + sum[i][1]) / 2;
 		}
+		return means;
 	}
 
 	private static void applyDefaultMean(List<Row> rows) {
@@ -197,7 +219,6 @@ public class Utility {
 	}
 
 	public static void groupRowDataMap(Map<String, List<Row>> name, Collection<Rule> rules, Row row) {
-		// Map<String, List<Row>> name = new HashMap<>();
 		for (Rule rule : rules) {
 			if (rule.isMatch(row)) {
 				List<Row> rowList = name.get(row.className);
@@ -208,51 +229,120 @@ public class Utility {
 				rowList.add(row);
 			}
 		}
-		// System.exit(0);
-		// return name;
 	}
 
-	public static List<String> dividedData(String fileName, Collection<Rule> rules) {
-		List<Row> rows = null;
+	public static File partitionData(String fileName, Collection<Rule> rules, boolean applyNumeric) {
+		rules.parallelStream().forEach(Rule::prepare);
+		// .collect(Collectors.toList());
 		try {
-			rows = Utility.parseCSV(fileName);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		rules.forEach(Rule::buildMap);
-		Map<String, List<Row>> rowMap = new HashMap<>();
-		for (Row row : rows) {
-			// logger.info(Arrays.deepToString(row.attributes) + " >> " +
-			// groupRowDataList(rules, row));
-			groupRowDataMap(rowMap, rules, row);
-		}
-		File file = new File("output");
-		if (!file.exists()) {
-			file.mkdir();
-		}
-		List<String> files = new ArrayList<>();
-		try {
-			for (Entry<String, List<Row>> entry : rowMap.entrySet()) {
-				File outputFile = new File(file.getAbsoluteFile() + "/" + entry.getValue().get(0).className);
-
-				if (!outputFile.exists()) {
-					outputFile.createNewFile();
+			BufferedReader reader = new BufferedReader(new FileReader(new File(fileName)));
+			String line;
+			File file = new File("output/c45.csv");
+			PrintWriter pw = new PrintWriter(file);
+			while ((line = reader.readLine()) != null) {
+				Row originalDataRow = parseLine(line);
+				if (originalDataRow == null)
+					continue;
+				Row clone = null;
+				if (applyNumeric) {
+					clone = cloneRow(originalDataRow);
+					applyMean(clone, means);
+				} else {
+					clone = originalDataRow;
 				}
-				PrintWriter pw = new PrintWriter(outputFile);
-				for (Row row : entry.getValue()) {
-					for (String attribute : row.attributes)
-						pw.write(attribute + ",");
-					pw.write("\n");
+				// List<Rule> matchRule = new ArrayList<>();
+				boolean status = false;
+				for (Rule rule : rules) {
+					if (rule.isMatch(clone)) {
+						status = true;
+						writeRow(pw, originalDataRow);
+						break;
+					}
 				}
-				files.add(outputFile.getAbsolutePath());
-				pw.close();
+				if(!status) {
+					System.out.println("not match :" + originalDataRow);
+				}
 			}
-		} catch (IOException e) {
-			// logger.error("Can't create file", e);
-			e.printStackTrace();
+			reader.close();
+			pw.close();
+			return file;
+			// writerMap.values().forEach(PrintWriter::close);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
-		return files;
+
+		return null;
+	}
+
+	public static List<String> dividedData(String fileName, Collection<Rule> rules, boolean applyNumeric) {
+		rules.parallelStream().forEach(Rule::prepare);
+		// .collect(Collectors.toList());
+		Map<String, PrintWriter> writerMap = new HashMap<>();
+		List<String> fileNames = new ArrayList<>();
+		try {
+			for (Rule rule : rules) {
+				if (!writerMap.containsKey(rule.id)) {
+					rule.id = Long.toHexString(System.nanoTime());
+					File file = new File("output/" + rule + ".csv");
+					writerMap.put(rule.id, new PrintWriter(file));
+					fileNames.add(file.getAbsolutePath());
+				}
+			}
+
+			BufferedReader reader = new BufferedReader(new FileReader(new File(fileName)));
+			String line;
+			while ((line = reader.readLine()) != null) {
+				Row originalDataRow = parseLine(line);
+				if (originalDataRow == null)
+					continue;
+				Row clone = null;
+				if (applyNumeric) {
+					clone = cloneRow(originalDataRow);
+					applyMean(clone, means);
+				} else {
+					clone = originalDataRow;
+				}
+				List<Rule> matchRule = new ArrayList<>();
+				for (Rule rule : rules) {
+					if (rule.isMatch(clone)) {
+						matchRule.add(rule);
+					}
+
+				}
+				// System.out.println("header :" +Arrays.toString(clone.header));
+				// System.out.println("Match rule size :" + matchRule.size()+" >>" + clone);
+				// System.exit(0);
+				writeToFile(matchRule, originalDataRow, writerMap);
+
+			}
+			reader.close();
+			writerMap.values().forEach(PrintWriter::close);
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
+		return fileNames;
+	}
+
+	private static void writeToFile(List<Rule> rules, Row row, Map<String, PrintWriter> writer) {
+		for (Rule rule : rules) {
+			PrintWriter pw = writer.get(rule.id);
+			int length = row.attributes.length;
+			for (int i = 0; i < length; i++)
+				pw.write(row.attributes[i] + ",");
+
+			pw.write(row.className + "\n");
+		}
+	}
+
+	private static void writeRow(PrintWriter pw, Row row) {
+		int length = row.attributes.length;
+		for (int i = 0; i < length; i++)
+			pw.write(row.attributes[i] + ",");
+
+		pw.write(row.className + "\n");
 
 	}
 
@@ -264,6 +354,11 @@ public class Utility {
 		}
 		rule.add(branch);
 		return rule;
+	}
+
+	public static boolean isPure(Rule rule) {
+
+		return false;
 	}
 
 	public static Row createCreateRow(Row row, int index) {

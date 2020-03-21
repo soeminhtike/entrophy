@@ -9,7 +9,6 @@ import org.apache.log4j.Logger;
 
 public class Row {
 
-	private static Logger logger = Logger.getLogger(Row.class);
 	public String className;
 
 	public String[] attributes;

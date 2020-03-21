@@ -21,11 +21,11 @@ public class C4_5 extends ID3 {
 
 	public static void main(String[] args) throws Exception {
 		C4_5 c45 = new C4_5();
-		List<Row> dataRows = Utility.parseCSV("test3.csv");
+		List<Row> dataRows = Utility.parseCSV("output/1", true);
 		c45.createTree(dataRows, c45.tree, "entry");
 		//Utility.print(c45.tree);
 		Utility.exportTreeJson(c45.tree);
-		Utility.dividedData("test2.csv", Utility.exportRules(c45.tree.branch.get(0)));
+		Utility.dividedData("test2.csv", Utility.exportRules(c45.tree.branch.get(0)), true);
 	}
 
 	public Data classified(int index, List<Row> list, double systemEntrophy) {
