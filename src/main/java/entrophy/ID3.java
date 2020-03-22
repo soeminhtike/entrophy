@@ -37,17 +37,20 @@ class ID3 {
 			};
 	// @formatter:on
 
+	public static final String sourceFile = "test4.csv";
+	
+	public static final String target = "output/";
 	// TODO
 	public static void main(String[] args) throws Exception {
 		ID3 id3 = new ID3();
-		List<Row> dataRows = Utility.parseCSV("test4.csv", true);
+		List<Row> dataRows = Utility.parseCSV(sourceFile, true);
 		id3.createTree(dataRows, id3.tree, "entry");
 
 		Collection<Rule> ruleList = Utility.exportRules(id3.tree.branch.get(0));
 		Utility.exportTreeJson(id3.tree.branch.get(0));
 		ruleList = ruleList.parallelStream().filter(Rule::isPure).collect(Collectors.toList());
 
-		File file = Utility.partitionData("test4.csv", ruleList, true);
+		File file = Utility.partitionData(sourceFile, ruleList, true);
 		C4_5 c45 = new C4_5();
 		c45.createTree(Utility.parseCSV(file.getAbsolutePath(), true), c45.tree, "entry");
 		Utility.exportTreeJson(c45.tree.branch.get(0));

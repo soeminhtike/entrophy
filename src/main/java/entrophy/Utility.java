@@ -237,7 +237,7 @@ public class Utility {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(new File(fileName)));
 			String line;
-			File file = new File("output/c45.csv");
+			File file = new File(ID3.target + "c45.csv");
 			PrintWriter pw = new PrintWriter(file);
 			while ((line = reader.readLine()) != null) {
 				Row originalDataRow = parseLine(line);
