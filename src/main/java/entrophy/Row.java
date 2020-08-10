@@ -38,7 +38,7 @@ public class Row {
 	}
 
 	public String toString() {
-		return String.format("%s - %s \n", className, Arrays.toString(attributes));
+		return String.format("class name: %s - %s \n", className, Arrays.toString(attributes));
 	}
 
 	public String getClassName() {
@@ -85,6 +85,14 @@ public class Row {
 			entro += -(num * Utility.log2(num));
 		}
 		return entro;
+	}
+	
+	public float[] toFloat() {
+		float[] data = new float[attributes.length];
+		for(int innerI = 0; innerI < attributes.length; innerI++) {
+			data[innerI] = Float.parseFloat(attributes[innerI]);
+		}
+		return data;
 	}
 
 	

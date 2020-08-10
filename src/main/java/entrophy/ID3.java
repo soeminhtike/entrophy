@@ -12,36 +12,29 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.PropertyConfigurator;
+import org.ejml.simple.SimpleMatrix;
 
 class ID3 {
 
-	// private static Logger logger = Logger.getLogger(ID3.class);
-
 	public Branch tree = new Branch("##");
 
-	// private PrintWriter pw;
-
 	public ID3() throws FileNotFoundException {
-		// pw = new PrintWriter(new File("operation.log"));
 		PropertyConfigurator.configure(new FileInputStream(new File("src/test/resources/log4j.properties")));
 	}
 
-	// public static final String[] header = { "Outlook", "Temperature",
-	// "Humidity",
-	// "Wind" };
-
 	// @formatter:off
-	public static final String[] header = { 
-"Class", "Repeat", "Attendance", "Difficulty", "Q1", "Q2", "Q3", "Q4", "Q5","Q6", "Q7", "Q8", "Q9", "Q10", "Q11", "Q12", "Q13", "Q14", "Q15", "Q16", "Q17", "Q18", "Q19", "Q20", "Q21",
-			"Q22", "Q23", "Q24", "Q25", "Q26", "Q27", "Q28" 
-			};
+	public static final String[] header = { "Class", "Repeat", "Attendance", "Difficulty", "Q1", "Q2", "Q3", "Q4", "Q5",
+			"Q6", "Q7", "Q8", "Q9", "Q10", "Q11", "Q12", "Q13", "Q14", "Q15", "Q16", "Q17", "Q18", "Q19", "Q20", "Q21",
+			"Q22", "Q23", "Q24", "Q25", "Q26", "Q27", "Q28" };
 	// @formatter:on
 
-	public static final String sourceFile = "test4.csv";
-	
+	public static final String sourceFile = "studentTest.csv";
+
 	public static final String target = "output/";
+
 	// TODO
 	public static void main(String[] args) throws Exception {
+		// List<Row> datas = Utility.parseCSV(sourceFile, true);
 		ID3 id3 = new ID3();
 		List<Row> dataRows = Utility.parseCSV(sourceFile, true);
 		id3.createTree(dataRows, id3.tree, "entry");

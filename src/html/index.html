@@ -1,23 +1,26 @@
 <!DOCTYPE html>
 <html>
-    <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width">
-	<title> Chart emulation </title>
-	<link rel="stylesheet" href="../../Treant.css">
-	<link rel="stylesheet" href="super-simple.css">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width">
+<title>Chart emulation</title>
+<link rel="stylesheet" href="../js/Treant.css">
+<link rel="stylesheet" href="super-simple.css">
 </head>
-<body>
-	<div class="chart" id="OrganiseChart-simple" style="width:100vw; height:100vh;">
-	</div>
-	
-	<script src="../../vendor/raphael.js"></script>
-	<script src="../../Treant.js"></script>
+<body onload="loadChart();">
+	<div class="chart" id="OrganiseChart-simple"
+		style="width: 100vw; height: 100vh; overflow:auto;"></div>
+
+	<script src="../js/raphael.js"></script>
+	<script src="../js/Treant.js"></script>
 	<script src="super-simple.js"></script>
 
 	<script>
-		new Treant( simple_chart_config );
+		function loadChart() {
+			console.log(simple_chart_config);
+			new Treant(simple_chart_config);
+		}
 	</script>
 
 </body>

@@ -13,20 +13,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+import org.ejml.simple.SimpleMatrix;
+
 import entrophy.Rule.Matcher;
 
 public class Utility {
-
-	// private static Logger logger = Logger.getLogger(Utility.class);
 
 	private static final boolean applyNumeric = true;
 
 	private static boolean manualMean = true;
 
-	public static int[] means = { 7, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 };
+	public static final int dataLength = 32;
+
+	public static int[] means = { 7, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+			3, 3, 3 };
 
 	// location of class name
 	private static final boolean first = false;
+
+	private static Logger logger = Logger.getLogger(Utility.class);
 
 	public static double computeSystemEntrophy(List<Row> attributes) {
 		Map<String, Float> map = new HashMap<>();
@@ -64,22 +70,30 @@ public class Utility {
 		System.out.println(test.substring(1, test.length() - 1));
 	}
 
-	public static List<Row> parseCSV(String fileName, boolean applyNumeric) throws FileNotFoundException, IOException {
-		BufferedReader br = new BufferedReader(new FileReader(fileName));
+	public static List<Row> parseCSV(String fileName, boolean applyNumeric) {
+		BufferedReader br = null;
+		try {
+			br = new BufferedReader(new FileReader(fileName));
+		} catch (FileNotFoundException e) {
+			logger.error("Can't located file ", e);
+			return new ArrayList<>();
+		}
 
 		String line;
 		List<Row> rows = new ArrayList<>();
-		System.out.println("---------Processing CSV ----------------");
-		System.out.println("File name :" + fileName);
 		int lineCount = 0;
-		while ((line = br.readLine()) != null) {
-			Row row = parseLine(line);
-			if (row == null)
-				continue;
-			rows.add(Row.create(line, first));
-			lineCount++;
+		try {
+			while ((line = br.readLine()) != null) {
+				Row row = parseLine(line);
+				if (row == null)
+					continue;
+				rows.add(Row.create(line, first));
+				lineCount++;
+			}
+			br.close();
+		} catch (IOException e) {
+			logger.error("Can't close reader", e);
 		}
-		br.close();
 		System.out.println("Total line :" + lineCount);
 		if (applyNumeric)
 			applyNumeric(rows);
@@ -109,7 +123,10 @@ public class Utility {
 
 	private static void applyMinMaxMean(List<Row> rows) {
 		means = manualMean ? means : calculateMeans(rows);
-		rows.parallelStream().forEach(row -> applyMean(row, means));
+		// rows.parallelStream().forEach(row -> applyMean(row, means));
+		for (int i = 0; i < rows.size(); i++) {
+			applyMean(rows.get(i), means);
+		}
 	}
 
 	private static void applyMean(Row row, int[] means) {
@@ -233,12 +250,12 @@ public class Utility {
 
 	public static File partitionData(String fileName, Collection<Rule> rules, boolean applyNumeric) {
 		rules.parallelStream().forEach(Rule::prepare);
-		// .collect(Collectors.toList());
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(new File(fileName)));
 			String line;
 			File file = new File(ID3.target + "c45.csv");
 			PrintWriter pw = new PrintWriter(file);
+			PrintWriter linearRegressionFile = new PrintWriter(new File(ID3.target + "linearregression.csv"));
 			while ((line = reader.readLine()) != null) {
 				Row originalDataRow = parseLine(line);
 				if (originalDataRow == null)
@@ -259,12 +276,14 @@ public class Utility {
 						break;
 					}
 				}
-				if(!status) {
-					System.out.println("not match :" + originalDataRow);
+				if (!status) {
+					// System.out.println("not match :" + originalDataRow);
+					addToLinearRegressionDataFile(originalDataRow, linearRegressionFile);
 				}
 			}
 			reader.close();
 			pw.close();
+			linearRegressionFile.close();
 			return file;
 			// writerMap.values().forEach(PrintWriter::close);
 		} catch (IOException e1) {
@@ -273,6 +292,22 @@ public class Utility {
 		}
 
 		return null;
+	}
+
+	private static void addToLinearRegressionDataFile(Row row, PrintWriter pw) {
+		writeRow(pw, row);
+	}
+
+	public static SimpleMatrix toSimpleMatrix(List<Row> rows) {
+		return new SimpleMatrix(toFloat(rows));
+	}
+
+	private static float[][] toFloat(List<Row> rows) {
+		float[][] rawData = new float[rows.size()][];
+		for (int i = 0; i < rows.size(); i++) {
+			rawData[i] = rows.get(i).toFloat();
+		}
+		return rawData;
 	}
 
 	public static List<String> dividedData(String fileName, Collection<Rule> rules, boolean applyNumeric) {
