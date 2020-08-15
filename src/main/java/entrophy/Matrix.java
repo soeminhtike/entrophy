@@ -1,6 +1,9 @@
 package entrophy;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.List;
 
 import org.ejml.simple.SimpleMatrix;
 
@@ -16,22 +19,24 @@ public class Matrix {
 		 SimpleMatrix X = data[0];
 		 SimpleMatrix Y = data[1];
 		
-		System.out.println(" X");
 		X.printDimensions();
-
-		System.out.println("Y");
 		Y.printDimensions();
-		System.out.println("Start");
 		SimpleMatrix Xtransport = X.transpose();
 		
 		X = Xtransport.mult(X);
-
 		SimpleMatrix mat = X.pseudoInverse();
-		System.out.println("second step");
-		mat.printDimensions();
 		mat = mat.mult(Xtransport).mult(Y);
-		System.out.print("---------------");
-		mat.printDimensions();
-		mat.print();
+		// mat.printDimensions();
+		List<Row> dataList = Utility.parseCSV("output/linearregression.csv", false);
+		
+		double[] b = MatrixUtil.toArray(mat);
+		System.out.println(Arrays.toString(b));
+		PrintWriter pw = new PrintWriter("output/linearregression_estimate.csv");
+		for(Row row : dataList) {
+			double estimateY = MatrixUtil.estimateY(b, row);
+			pw.write(estimateY + " >>" + row);
+		}
+		pw.close();
+		dataList.stream().map( row -> MatrixUtil.estimateY(b, row)).forEach( x -> System.out.print(""));
 	}
 }

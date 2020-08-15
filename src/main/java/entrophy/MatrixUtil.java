@@ -36,6 +36,23 @@ public class MatrixUtil {
 		}
 		return number;
 	}
+	
+	public static double[] toArray(SimpleMatrix vector) {
+		double[] b = new double[vector.numRows()];
+		for(int i=0;i<vector.numRows();i++) {
+			b[i]= vector.get(i,0);
+		}
+		return b;
+	}
+	
+	public static double estimateY(double[] b, Row row) {
+		double y = b[0];
+		for(int i=1;i<b.length;i++) {
+			//System.out.println(i+" >> " + row);
+			y += Double.parseDouble(row.attributes[i-1]) * b[i];
+		}
+		return y;
+	}
 
 	private static float[][] toMatrix(List<Row> rowList) {
 		int size = rowList.get(0).attributes.length + 1;
