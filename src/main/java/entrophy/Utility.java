@@ -83,6 +83,8 @@ public class Utility {
 		List<Row> rows = new ArrayList<>();
 		int lineCount = 0;
 		try {
+			line = br.readLine();
+			updateHeader(line);
 			while ((line = br.readLine()) != null) {
 				Row row = parseLine(line);
 				if (row == null)
@@ -100,9 +102,21 @@ public class Utility {
 		return rows;
 	}
 
+	private static void updateHeader(String headerLine) {
+		if (!headerLine.startsWith("#"))
+			return;
+		String[] rawHeader = headerLine.substring(1).split(",");
+		ID3.header = new String[rawHeader.length - 1];
+		for (int i = 0; i < rawHeader.length - 1; i++) {
+			ID3.header[i] = rawHeader[i];
+		}
+		
+	}
+
 	private static Row parseLine(String line) {
-		if (line.startsWith("#"))
+		if (line.startsWith("#")) {
 			return null;
+		}
 		Row row = Row.create(line, first);
 		row.header = ID3.header;
 		return row;
@@ -123,7 +137,6 @@ public class Utility {
 
 	private static void applyMinMaxMean(List<Row> rows) {
 		means = manualMean ? means : calculateMeans(rows);
-		// rows.parallelStream().forEach(row -> applyMean(row, means));
 		for (int i = 0; i < rows.size(); i++) {
 			applyMean(rows.get(i), means);
 		}
@@ -140,7 +153,6 @@ public class Utility {
 
 		rows.parallelStream().forEach(row -> {
 			for (int i = 0; i < row.attributes.length; i++) {
-				// sum[i] += Integer.parseInt(row.attributes[i]);
 				int num = Integer.parseInt(row.attributes[i]);
 				if (num > sum[i][1]) { // maximum
 					sum[i][1] = num;
@@ -164,13 +176,6 @@ public class Utility {
 		for (Row row : rows) {
 			for (int i = 0; i < row.attributes.length; i++) {
 				sum[i] += Integer.parseInt(row.attributes[i]);
-				// int num = Integer.parseInt(row.attributes[i]);
-				// if (num > sum[i][1]) { // maximum
-				// sum[i] = num;
-				// }
-				// if (num < sum[i][0]) // minimum
-				// sum[i][0] = num;
-
 			}
 		}
 
@@ -256,6 +261,7 @@ public class Utility {
 			File file = new File(ID3.target + "c45.csv");
 			PrintWriter pw = new PrintWriter(file);
 			PrintWriter linearRegressionFile = new PrintWriter(new File(ID3.target + "linearregression.csv"));
+			int i = 0;
 			while ((line = reader.readLine()) != null) {
 				Row originalDataRow = parseLine(line);
 				if (originalDataRow == null)
@@ -269,6 +275,7 @@ public class Utility {
 				}
 				// List<Rule> matchRule = new ArrayList<>();
 				boolean status = false;
+				i++;
 				for (Rule rule : rules) {
 					if (rule.isMatch(clone)) {
 						status = true;
@@ -278,9 +285,11 @@ public class Utility {
 				}
 				if (!status) {
 					// System.out.println("not match :" + originalDataRow);
+					logger.info("here");
 					addToLinearRegressionDataFile(originalDataRow, linearRegressionFile);
 				}
 			}
+			logger.info("total row :" + i);
 			reader.close();
 			pw.close();
 			linearRegressionFile.close();
