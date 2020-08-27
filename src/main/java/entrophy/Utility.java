@@ -110,11 +110,11 @@ public class Utility {
 		for (int i = 0; i < rawHeader.length - 1; i++) {
 			ID3.header[i] = rawHeader[i];
 		}
-		
+		ID3.className = rawHeader[rawHeader.length-1];
 	}
 
 	private static Row parseLine(String line) {
-		if (line.startsWith("#")) {
+		if (line.startsWith("#") || line.trim().equals("")) {
 			return null;
 		}
 		Row row = Row.create(line, first);
@@ -253,6 +253,14 @@ public class Utility {
 		}
 	}
 
+	private static void addHeader(PrintWriter pw) {
+		StringBuffer buffer = new StringBuffer();
+		for (String header : ID3.header) {
+			buffer.append(header + ",");
+		}
+		pw.write(buffer.toString() + ID3.className + "\n");
+	}
+
 	public static File partitionData(String fileName, Collection<Rule> rules, boolean applyNumeric) {
 		rules.parallelStream().forEach(Rule::prepare);
 		try {
@@ -260,6 +268,7 @@ public class Utility {
 			String line;
 			File file = new File(ID3.target + "c45.csv");
 			PrintWriter pw = new PrintWriter(file);
+			addHeader(pw);
 			PrintWriter linearRegressionFile = new PrintWriter(new File(ID3.target + "linearregression.csv"));
 			int i = 0;
 			while ((line = reader.readLine()) != null) {
@@ -285,7 +294,6 @@ public class Utility {
 				}
 				if (!status) {
 					// System.out.println("not match :" + originalDataRow);
-					logger.info("here");
 					addToLinearRegressionDataFile(originalDataRow, linearRegressionFile);
 				}
 			}

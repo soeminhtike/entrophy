@@ -17,22 +17,25 @@ import org.ejml.simple.SimpleMatrix;
 
 class ID3 {
 
+	// @formatter:off
+	public static String[] header; // { "Class", "Repeat", "Attendance", "Difficulty", "Q1", "Q2", "Q3", "Q4",
+									// "Q5",
+	// "Q6", "Q7", "Q8", "Q9", "Q10", "Q11", "Q12", "Q13", "Q14", "Q15", "Q16",
+	// "Q17", "Q18", "Q19", "Q20", "Q21",
+	// "Q22", "Q23", "Q24", "Q25", "Q26", "Q27", "Q28" };
+	// @formatter:on
+	
+	public static final String sourceFile = "test2.csv";
+
+	public static final String target = "output/";
+	
+	public static String className = "";
+
 	public Branch tree = new Branch("##");
 
 	public ID3() throws FileNotFoundException {
 		PropertyConfigurator.configure(new FileInputStream(new File("src/test/resources/log4j.properties")));
 	}
-
-	// @formatter:off
-	public static String[] header ; //{ "Class", "Repeat", "Attendance", "Difficulty", "Q1", "Q2", "Q3", "Q4", "Q5",
-		//	"Q6", "Q7", "Q8", "Q9", "Q10", "Q11", "Q12", "Q13", "Q14", "Q15", "Q16", "Q17", "Q18", "Q19", "Q20", "Q21",
-		//	"Q22", "Q23", "Q24", "Q25", "Q26", "Q27", "Q28" };
-	// @formatter:on
-
-	public static final String sourceFile = "test2.csv";
-
-	public static final String target = "output/";
-	
 
 	// TODO
 	public static void main(String[] args) throws Exception {
@@ -40,7 +43,6 @@ class ID3 {
 		ID3 id3 = new ID3();
 		List<Row> dataRows = Utility.parseCSV(sourceFile, true);
 		id3.createTree(dataRows, id3.tree, "entry");
-		System.out.println("Header name :" + Arrays.toString(ID3.header));
 		Collection<Rule> ruleList = Utility.exportRules(id3.tree.branch.get(0));
 		Utility.exportTreeJson(id3.tree.branch.get(0));
 		ruleList = ruleList.parallelStream().filter(Rule::isPure).collect(Collectors.toList());
