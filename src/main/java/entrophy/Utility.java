@@ -26,8 +26,7 @@ public class Utility {
 
 	public static final int dataLength = 32;
 
-	public static int[] means = { 7, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-			3, 3, 3 };
+	public static int[] means = {7, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3};
 
 	// location of class name
 	private static final boolean first = false;
@@ -81,13 +80,13 @@ public class Utility {
 		int lineCount = 0;
 		try {
 			line = br.readLine();
-			updateHeader(line);
+			if (isHeader(line))
+				updateHeader(line);
+			else
+				createRow(line, rows, lineCount);
+
 			while ((line = br.readLine()) != null) {
-				Row row = parseLine(line);
-				if (row == null)
-					continue;
-				rows.add(Row.create(line, first));
-				lineCount++;
+				lineCount = createRow(line, rows, lineCount);
 			}
 			br.close();
 		} catch (IOException e) {
@@ -101,15 +100,28 @@ public class Utility {
 		return rows;
 	}
 
-	private static void updateHeader(String headerLine) {
+	private static int createRow(String line, List<Row> rows, int lineCount) {
+		Row row = parseLine(line);
+		if (row == null)
+			return lineCount;
+		rows.add(Row.create(line, first));
+		return lineCount++;
+	}
+
+	private static boolean isHeader(String line) {
+		return line.startsWith("#");
+	}
+
+	private static boolean updateHeader(String headerLine) {
 		if (!headerLine.startsWith("#"))
-			return;
+			return false;
 		String[] rawHeader = headerLine.split(",");
 		ID3.header = new String[rawHeader.length - 1];
 		for (int i = 0; i < rawHeader.length - 1; i++) {
 			ID3.header[i] = rawHeader[i];
 		}
-		ID3.className = rawHeader[rawHeader.length-1];
+		ID3.className = rawHeader[rawHeader.length - 1];
+		return true;
 	}
 
 	private static Row parseLine(String line) {
@@ -360,8 +372,10 @@ public class Utility {
 					}
 
 				}
-				// System.out.println("header :" +Arrays.toString(clone.header));
-				// System.out.println("Match rule size :" + matchRule.size()+" >>" + clone);
+				// System.out.println("header :"
+				// +Arrays.toString(clone.header));
+				// System.out.println("Match rule size :" + matchRule.size()+"
+				// >>" + clone);
 				// System.exit(0);
 				writeToFile(matchRule, originalDataRow, writerMap);
 
