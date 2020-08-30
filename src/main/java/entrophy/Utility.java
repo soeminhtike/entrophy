@@ -83,7 +83,7 @@ public class Utility {
 			if (isHeader(line))
 				updateHeader(line);
 			else
-				createRow(line, rows, lineCount);
+				lineCount = createRow(line, rows, lineCount);
 
 			while ((line = br.readLine()) != null) {
 				lineCount = createRow(line, rows, lineCount);
@@ -105,7 +105,8 @@ public class Utility {
 		if (row == null)
 			return lineCount;
 		rows.add(Row.create(line, first));
-		return lineCount++;
+		System.out.println(" line count :" + lineCount);
+		return ++lineCount;
 	}
 
 	private static boolean isHeader(String line) {
