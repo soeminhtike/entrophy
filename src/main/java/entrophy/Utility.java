@@ -32,7 +32,7 @@ public class Utility {
 	// location of class name
 	private static final boolean first = false;
 
-	private static Logger logger = Logger.getLogger(Utility.class);
+	// private static Logger logger = Logger.getLogger(Utility.class);
 
 	public static double computeSystemEntrophy(List<Row> attributes) {
 		Map<String, Float> map = new HashMap<>();
@@ -54,9 +54,6 @@ public class Utility {
 	}
 
 	public static void print(Branch tree) {
-		for (int i = 0; i < tree.level; i++) {
-			System.out.print("--");
-		}
 		System.out.println(String.format("[%s:%s]  ", tree.criteria, tree.name, tree.branch.size(), tree.level));
 		if (!tree.branch.isEmpty()) {
 			for (Branch branch : tree.branch) {
@@ -75,7 +72,7 @@ public class Utility {
 		try {
 			br = new BufferedReader(new FileReader(fileName));
 		} catch (FileNotFoundException e) {
-			logger.error("Can't located file ", e);
+			// logger.error("Can't located file ", e);
 			return new ArrayList<>();
 		}
 
@@ -94,7 +91,9 @@ public class Utility {
 			}
 			br.close();
 		} catch (IOException e) {
-			logger.error("Can't close reader", e);
+			// logger.error("Can't close reader", e);
+			System.out.println("Can't close reader");
+			e.printStackTrace();
 		}
 		System.out.println("Total line :" + lineCount);
 		if (applyNumeric)
@@ -105,7 +104,7 @@ public class Utility {
 	private static void updateHeader(String headerLine) {
 		if (!headerLine.startsWith("#"))
 			return;
-		String[] rawHeader = headerLine.substring(1).split(",");
+		String[] rawHeader = headerLine.split(",");
 		ID3.header = new String[rawHeader.length - 1];
 		for (int i = 0; i < rawHeader.length - 1; i++) {
 			ID3.header[i] = rawHeader[i];
@@ -297,7 +296,6 @@ public class Utility {
 					addToLinearRegressionDataFile(originalDataRow, linearRegressionFile);
 				}
 			}
-			logger.info("total row :" + i);
 			reader.close();
 			pw.close();
 			linearRegressionFile.close();

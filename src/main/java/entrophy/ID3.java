@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +12,6 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.PropertyConfigurator;
-import org.ejml.simple.SimpleMatrix;
 
 class ID3 {
 

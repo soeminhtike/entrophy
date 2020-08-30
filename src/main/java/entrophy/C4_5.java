@@ -13,15 +13,13 @@ import org.apache.log4j.PropertyConfigurator;
 
 public class C4_5 extends ID3 {
 	
-	// private static Logger logger = Logger.getLogger(C4_5.class);
-
 	public C4_5() throws FileNotFoundException {
 		PropertyConfigurator.configure(new FileInputStream(new File("src/test/resources/log4j.properties")));
 	}
 
 	public static void main(String[] args) throws Exception {
 		C4_5 c45 = new C4_5();
-		List<Row> dataRows = Utility.parseCSV("output/1", true);
+		List<Row> dataRows = Utility.parseCSV("output/c45.csv", true);
 		c45.createTree(dataRows, c45.tree, "entry");
 		//Utility.print(c45.tree);
 		Utility.exportTreeJson(c45.tree);
